@@ -52,23 +52,12 @@ function newSkill(name: string, icon: string, targetHours: number): Skill {
 }
 
 function buildSeedSkill(): Skill {
-  const skill = newSkill('Quantum Computing', '⚛', DEFAULT_TARGET_HOURS)
+  const skill = newSkill('Reading', '📖', DEFAULT_TARGET_HOURS)
   const today = todayISO()
   const dates: { offset: number; hours: number }[] = [
-    { offset: -14, hours: 2 },
-    { offset: -13, hours: 1.5 },
-    { offset: -12, hours: 3 },
-    { offset: -10, hours: 2.5 },
-    { offset: -9, hours: 1 },
-    { offset: -8, hours: 2 },
-    { offset: -7, hours: 4 },
-    { offset: -6, hours: 2 },
-    { offset: -5, hours: 1.5 },
-    { offset: -4, hours: 3 },
-    { offset: -3, hours: 2 },
-    { offset: -2, hours: 2.5 },
-    { offset: -1, hours: 1 },
-    { offset: 0, hours: 2 },
+    { offset: -2, hours: 1.5 },
+    { offset: -1, hours: 2 },
+    { offset: 0, hours: 1.5 },
   ]
   let total = 0
   let streak = 0
