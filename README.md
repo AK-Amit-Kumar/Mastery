@@ -1,4 +1,7 @@
 #  MASTERY
+<img width="2366" height="1300" alt="MASTERY-collage" src="https://github.com/user-attachments/assets/309163b9-c4c3-4d44-944e-9089a81b9740" />
+
+
 
 **10,000 hours to greatness.**
 
