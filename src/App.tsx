@@ -95,6 +95,7 @@ export default function App() {
                 </RequireAuth>
               }
             />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
         <footer className="border-t-2 border-line bg-panel py-4 text-center">
