@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #0a0a1a;
+  color: #e8e6f0;
+  image-rendering: pixelated;
+}
+
+body {
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(77, 238, 234, 0.06), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(249, 42, 173, 0.06), transparent 40%);
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-pixel {
+  font-family: 'Press Start 2P', cursive;
+}
+
+::selection {
+  background: #f92aad;
+  color: #0a0a1a;
+}
+
+/* scrollbar - chunky retro */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: #12122a;
+}
+::-webkit-scrollbar-thumb {
+  background: #4deeea;
+  border: 2px solid #0a0a1a;
+}
+
+/* CRT scanline overlay */
+.crt-overlay {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0.12) 1px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0) 3px
+  );
+  mix-blend-mode: multiply;
+  animation: flicker 3s infinite;
+}
+
+.crt-overlay::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.35) 100%);
+}
+
+/* pixel-corner clipping used for chunky "rounded" borders without blur */
+.pixel-corners {
+  clip-path: polygon(
+    0px 8px, 4px 8px, 4px 4px, 8px 4px, 8px 0px,
+    calc(100% - 8px) 0px, calc(100% - 8px) 4px, calc(100% - 4px) 4px, calc(100% - 4px) 8px, 100% 8px,
+    100% calc(100% - 8px), calc(100% - 4px) calc(100% - 8px), calc(100% - 4px) calc(100% - 4px), calc(100% - 8px) calc(100% - 4px), calc(100% - 8px) 100%,
+    8px 100%, 8px calc(100% - 4px), 4px calc(100% - 4px), 4px calc(100% - 8px), 0px calc(100% - 8px)
+  );
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
