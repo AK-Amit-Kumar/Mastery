@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import type { Skill } from '../types'
 import { getTierProgress } from '../utils/leveling'
+import { seedColor } from '../utils/color'
 import TierBadge from './TierBadge'
 import PixelBar from './PixelBar'
 import StreakFlame from './StreakFlame'
@@ -18,7 +19,7 @@ export default function SkillCard({ skill }: SkillCardProps) {
       className="block bg-panel border-2 border-line shadow-pixel hover:shadow-pixel-cyan hover:-translate-y-1 transition-all p-4"
     >
       <div className="flex items-center gap-3 mb-3">
-        <TierBadge tier={tier} size={48} />
+        <TierBadge tier={tier} size={48} accent={seedColor(skill.id)} />
         <div className="min-w-0 flex-1">
           <p className="font-pixel text-xs text-paper truncate flex items-center gap-2">
             <span>{skill.icon}</span>

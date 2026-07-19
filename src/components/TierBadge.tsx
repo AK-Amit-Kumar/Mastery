@@ -109,16 +109,22 @@ interface TierBadgeProps {
   tier: Tier
   size?: number // total px width/height
   className?: string
+  accent?: string // per-skill border tint so same-tier badges don't look identical
 }
 
-export default function TierBadge({ tier, size = 64, className = '' }: TierBadgeProps) {
+export default function TierBadge({ tier, size = 64, className = '', accent }: TierBadgeProps) {
   const grid = PATTERNS[tier.shape]
   const cell = size / 8
 
   return (
     <div
       className={`inline-flex items-center justify-center bg-ink border-2 border-line ${className}`}
-      style={{ width: size + 8, height: size + 8, imageRendering: 'pixelated' }}
+      style={{
+        width: size + 8,
+        height: size + 8,
+        imageRendering: 'pixelated',
+        ...(accent ? { borderColor: accent } : {}),
+      }}
       title={tier.name}
     >
       <svg width={size} height={size} shapeRendering="crispEdges">

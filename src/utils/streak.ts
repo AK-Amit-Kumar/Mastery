@@ -39,6 +39,37 @@ export function computeStreak(
 }
 
 /**
+ * Recomputes streak state from scratch given a skill's full session list.
+ * Used after editing or deleting a session, since streaks can no longer be
+ * derived incrementally from a single before/after comparison.
+ */
+export function recomputeStreakFromSessions(sessions: { date: string }[]): {
+  dailyStreak: number
+  longestStreak: number
+  lastLogDate: string | null
+} {
+  if (sessions.length === 0) {
+    return { dailyStreak: 0, longestStreak: 0, lastLogDate: null }
+  }
+
+  const uniqueDates = Array.from(new Set(sessions.map((s) => s.date))).sort()
+
+  let runLength = 1
+  let longestStreak = 1
+  for (let i = 1; i < uniqueDates.length; i++) {
+    const gap = daysBetween(uniqueDates[i - 1], uniqueDates[i])
+    runLength = gap === 1 ? runLength + 1 : 1
+    longestStreak = Math.max(longestStreak, runLength)
+  }
+
+  return {
+    dailyStreak: runLength,
+    longestStreak,
+    lastLogDate: uniqueDates[uniqueDates.length - 1],
+  }
+}
+
+/**
  * Checks whether an existing streak should be reset to 0 due to inactivity,
  * evaluated against "today" independent of logging a new session.
  */

@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 import type { AchievementId, Skill, UnlockedAchievement } from '../types'
 import { generateId } from '../utils/icons'
 import { todayISO, isWeekend, addDays } from '../utils/date'
-import { computeStreak } from '../utils/streak'
+import { computeStreak, recomputeStreakFromSessions } from '../utils/streak'
 import { getTierForHours } from '../utils/leveling'
 import type { ClickSoundId } from '../utils/sound'
 
@@ -27,6 +27,8 @@ interface MasteryState {
   addSkill: (name: string, icon: string, targetHours?: number) => string
   deleteSkill: (id: string) => void
   logSession: (skillId: string, hours: number, note?: string, date?: string) => void
+  updateSession: (skillId: string, sessionId: string, updates: { date: string; hoursSpent: number; note?: string }) => void
+  deleteSession: (skillId: string, sessionId: string) => void
   toggleMute: () => void
   setClickSound: (id: ClickSoundId) => void
   resetAllData: () => void
@@ -184,6 +186,35 @@ export const useStore = create<MasteryState>()(
           unlockedAchievements,
           levelUpEvent: levelUpEvent ?? s.levelUpEvent,
           masterCelebrationSkillId: masterCelebrationSkillId ?? s.masterCelebrationSkillId,
+        }))
+      },
+
+      updateSession: (skillId, sessionId, updates) => {
+        if (updates.hoursSpent <= 0) return
+        set((state) => ({
+          skills: state.skills.map((sk) => {
+            if (sk.id !== skillId) return sk
+            const sessions = sk.sessions.map((s) =>
+              s.id === sessionId
+                ? { ...s, date: updates.date, hoursSpent: updates.hoursSpent, note: updates.note?.trim() || undefined }
+                : s
+            )
+            const totalHoursLogged = Math.round(sessions.reduce((sum, s) => sum + s.hoursSpent, 0) * 100) / 100
+            const { dailyStreak, longestStreak, lastLogDate } = recomputeStreakFromSessions(sessions)
+            return { ...sk, sessions, totalHoursLogged, dailyStreak, longestStreak, lastLogDate }
+          }),
+        }))
+      },
+
+      deleteSession: (skillId, sessionId) => {
+        set((state) => ({
+          skills: state.skills.map((sk) => {
+            if (sk.id !== skillId) return sk
+            const sessions = sk.sessions.filter((s) => s.id !== sessionId)
+            const totalHoursLogged = Math.round(sessions.reduce((sum, s) => sum + s.hoursSpent, 0) * 100) / 100
+            const { dailyStreak, longestStreak, lastLogDate } = recomputeStreakFromSessions(sessions)
+            return { ...sk, sessions, totalHoursLogged, dailyStreak, longestStreak, lastLogDate }
+          }),
         }))
       },
 

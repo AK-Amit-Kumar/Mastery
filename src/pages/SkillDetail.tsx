@@ -1,8 +1,10 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useStore } from '../store/useStore'
+import type { Session } from '../types'
 import { getTierProgress, getOverallProgress, estimateYearsToMastery } from '../utils/leveling'
 import { todayISO, formatDateDisplay, daysBetween } from '../utils/date'
+import { seedColor } from '../utils/color'
 import TierBadge from '../components/TierBadge'
 import PixelBar from '../components/PixelBar'
 import PixelPanel from '../components/PixelPanel'
@@ -20,6 +22,8 @@ export default function SkillDetail() {
   const navigate = useNavigate()
   const skill = useStore((s) => s.skills.find((sk) => sk.id === id))
   const logSession = useStore((s) => s.logSession)
+  const updateSession = useStore((s) => s.updateSession)
+  const deleteSession = useStore((s) => s.deleteSession)
   const deleteSkill = useStore((s) => s.deleteSkill)
   const muted = useStore((s) => s.muted)
 
@@ -28,6 +32,11 @@ export default function SkillDetail() {
   const [date, setDate] = useState(todayISO())
   const [popups, setPopups] = useState<XPPopupItem[]>([])
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [editingSession, setEditingSession] = useState<Session | null>(null)
+  const [editHours, setEditHours] = useState('')
+  const [editDate, setEditDate] = useState('')
+  const [editNote, setEditNote] = useState('')
+  const [deletingSessionId, setDeletingSessionId] = useState<string | null>(null)
   const formRef = useRef<HTMLDivElement>(null)
 
   const progress = useMemo(() => (skill ? getTierProgress(skill.totalHoursLogged) : null), [skill])
@@ -89,6 +98,27 @@ export default function SkillDetail() {
     navigate('/')
   }
 
+  const openEditSession = (s: Session) => {
+    setEditingSession(s)
+    setEditHours(String(s.hoursSpent))
+    setEditDate(s.date)
+    setEditNote(s.note ?? '')
+  }
+
+  const handleSaveEdit = () => {
+    if (!editingSession) return
+    const h = parseFloat(editHours)
+    if (!h || h <= 0) return
+    updateSession(skill.id, editingSession.id, { date: editDate, hoursSpent: h, note: editNote })
+    setEditingSession(null)
+  }
+
+  const handleDeleteSession = () => {
+    if (!deletingSessionId) return
+    deleteSession(skill.id, deletingSessionId)
+    setDeletingSessionId(null)
+  }
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col gap-8">
       <XPPopup popups={popups} />
@@ -102,7 +132,7 @@ export default function SkillDetail() {
 
       {/* Header */}
       <PixelPanel glow="cyan" className="flex flex-col md:flex-row items-center gap-6">
-        <TierBadge tier={progress.tier} size={96} />
+        <TierBadge tier={progress.tier} size={96} accent={seedColor(skill.id)} />
         <div className="flex-1 text-center md:text-left">
           <h1 className="font-pixel text-lg md:text-xl text-paper flex items-center justify-center md:justify-start gap-2">
             <span>{skill.icon}</span>
@@ -248,7 +278,23 @@ export default function SkillDetail() {
                   <p className="font-body text-lg text-paper">{formatDateDisplay(s.date)}</p>
                   {s.note && <p className="font-body text-base text-paper/50 truncate">{s.note}</p>}
                 </div>
-                <p className="font-pixel text-xs text-amber shrink-0">+{s.hoursSpent}h</p>
+                <div className="flex items-center gap-2 shrink-0">
+                  <p className="font-pixel text-xs text-amber">+{s.hoursSpent}h</p>
+                  <button
+                    onClick={() => openEditSession(s)}
+                    title="Edit session"
+                    className="font-pixel text-[9px] px-2 py-1.5 border-2 border-line bg-panel text-cyan/80 hover:border-cyan hover:text-cyan"
+                  >
+                    EDIT
+                  </button>
+                  <button
+                    onClick={() => setDeletingSessionId(s.id)}
+                    title="Delete session"
+                    className="font-pixel text-[9px] px-2 py-1.5 border-2 border-line bg-panel text-paper/40 hover:border-blood hover:text-blood"
+                  >
+                    DEL
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -272,6 +318,64 @@ export default function SkillDetail() {
           </PixelButton>
           <PixelButton variant="danger" onClick={handleDelete}>
             DELETE FOREVER
+          </PixelButton>
+        </div>
+      </PixelModal>
+
+      <PixelModal open={!!editingSession} onClose={() => setEditingSession(null)} title="EDIT SESSION">
+        <div className="flex flex-col gap-4">
+          <div>
+            <label className="font-pixel text-[10px] text-paper/70 block mb-2">HOURS SPENT</label>
+            <input
+              type="number"
+              min={0}
+              step={0.25}
+              value={editHours}
+              onChange={(e) => setEditHours(e.target.value)}
+              className="w-full bg-ink border-2 border-line px-3 py-2 font-body text-xl text-paper focus:outline-none focus:border-cyan"
+            />
+          </div>
+          <div>
+            <label className="font-pixel text-[10px] text-paper/70 block mb-2">DATE</label>
+            <input
+              type="date"
+              value={editDate}
+              max={todayISO()}
+              onChange={(e) => setEditDate(e.target.value)}
+              className="w-full bg-ink border-2 border-line px-3 py-2 font-body text-xl text-paper focus:outline-none focus:border-cyan"
+            />
+          </div>
+          <div>
+            <label className="font-pixel text-[10px] text-paper/70 block mb-2">NOTE (OPTIONAL)</label>
+            <input
+              value={editNote}
+              onChange={(e) => setEditNote(e.target.value)}
+              maxLength={140}
+              className="w-full bg-ink border-2 border-line px-3 py-2 font-body text-xl text-paper focus:outline-none focus:border-cyan"
+            />
+          </div>
+          <div className="flex gap-3 justify-end">
+            <PixelButton variant="default" onClick={() => setEditingSession(null)}>
+              CANCEL
+            </PixelButton>
+            <PixelButton variant="cyan" onClick={handleSaveEdit} disabled={!parseFloat(editHours)}>
+              SAVE
+            </PixelButton>
+          </div>
+        </div>
+      </PixelModal>
+
+      <PixelModal open={!!deletingSessionId} onClose={() => setDeletingSessionId(null)} title="DELETE SESSION?">
+        <p className="font-body text-xl text-paper/80 mb-6">
+          This will permanently remove this logged session and recalculate your totals and streaks. This cannot be
+          undone.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <PixelButton variant="default" onClick={() => setDeletingSessionId(null)}>
+            CANCEL
+          </PixelButton>
+          <PixelButton variant="danger" onClick={handleDeleteSession}>
+            DELETE
           </PixelButton>
         </div>
       </PixelModal>
