@@ -270,31 +270,30 @@ export default function SkillDetail() {
         ) : (
           <div className="max-h-80 overflow-y-auto flex flex-col gap-2 pr-1">
             {skill.sessions.map((s) => (
-              <div
-                key={s.id}
-                className="flex items-center justify-between gap-3 border-2 border-line bg-panel2 px-3 py-2"
-              >
-                <div className="min-w-0">
-                  <p className="font-body text-lg text-paper">{formatDateDisplay(s.date)}</p>
-                  {s.note && <p className="font-body text-base text-paper/50 truncate">{s.note}</p>}
+              <div key={s.id} className="border-2 border-line bg-panel2 px-3 py-2">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="font-body text-lg text-paper shrink-0">{formatDateDisplay(s.date)}</p>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <p className="font-pixel text-xs text-amber">+{s.hoursSpent}h</p>
+                    <button
+                      onClick={() => openEditSession(s)}
+                      title="Edit session"
+                      className="font-pixel text-[9px] px-2 py-1.5 border-2 border-line bg-panel text-cyan/80 hover:border-cyan hover:text-cyan"
+                    >
+                      EDIT
+                    </button>
+                    <button
+                      onClick={() => setDeletingSessionId(s.id)}
+                      title="Delete session"
+                      className="font-pixel text-[9px] px-2 py-1.5 border-2 border-line bg-panel text-paper/40 hover:border-blood hover:text-blood"
+                    >
+                      DEL
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <p className="font-pixel text-xs text-amber">+{s.hoursSpent}h</p>
-                  <button
-                    onClick={() => openEditSession(s)}
-                    title="Edit session"
-                    className="font-pixel text-[9px] px-2 py-1.5 border-2 border-line bg-panel text-cyan/80 hover:border-cyan hover:text-cyan"
-                  >
-                    EDIT
-                  </button>
-                  <button
-                    onClick={() => setDeletingSessionId(s.id)}
-                    title="Delete session"
-                    className="font-pixel text-[9px] px-2 py-1.5 border-2 border-line bg-panel text-paper/40 hover:border-blood hover:text-blood"
-                  >
-                    DEL
-                  </button>
-                </div>
+                {s.note && (
+                  <p className="font-body text-base text-paper/50 mt-1 break-words">{s.note}</p>
+                )}
               </div>
             ))}
           </div>
