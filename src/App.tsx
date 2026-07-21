@@ -5,6 +5,7 @@ import { useAuthStore } from './store/useAuthStore'
 import { isSupabaseConfigured } from './lib/supabase'
 import { todayISO } from './utils/date'
 import { getNotificationPermission, showReminderNotification } from './utils/notifications'
+import { getThemeOption } from './utils/themes'
 import NavBar from './components/NavBar'
 import LevelUpModal from './components/LevelUpModal'
 import MasterCelebration from './components/MasterCelebration'
@@ -36,11 +37,18 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 export default function App() {
   const seedIfEmpty = useStore((s) => s.seedIfEmpty)
   const initializeAuth = useAuthStore((s) => s.initialize)
+  const theme = useStore((s) => s.theme)
 
   useEffect(() => {
     seedIfEmpty()
     initializeAuth()
   }, [seedIfEmpty, initializeAuth])
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    const meta = document.querySelector('meta[name="theme-color"]')
+    meta?.setAttribute('content', getThemeOption(theme).swatches[0])
+  }, [theme])
 
   useEffect(() => {
     const checkReminder = () => {

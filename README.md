@@ -44,7 +44,11 @@ Track as many skills as you want, log sessions as you go, and watch each one cli
 * 5 selectable 8 bit sound themes for UI clicks (Blip, Laser, Tick, Power up, Chime)
 * Distinct sound cues for logging hours, leveling up, and hitting MASTER rank
 * Mute toggle
+* 4 selectable color themes (Arcade, Matrix, Vaporwave, Ice) — retints the whole app's accent palette; tier ranks and achievement icons stay fixed
 * CRT scanline overlay, Press Start 2P / VT323 pixel fonts throughout
+
+**Sharing**
+* "Share Progress" button on each skill generates a downloadable pixel-art PNG card (tier, hours, streak, weekly progress) for posting or backing up a milestone
 
 **Data control**
 * All skill/session data stored locally in the browser (instant, offline friendly)
@@ -70,6 +74,7 @@ Track as many skills as you want, log sessions as you go, and watch each one cli
 | Auth & shared data | Supabase (email/password auth + Postgres) |
 | Routing | react-router-dom |
 | Offline / installability | vite-plugin-pwa (Workbox) — service worker + web app manifest |
+| Image export | html-to-image — renders the shareable progress card to PNG |
 | Hosting | Netlify (auto deploy on push to `main`) |
 
 ##
@@ -158,12 +163,10 @@ Output is generated in `dist/`.
 
 Planned improvements for future versions:
 
-1. **Shareable progress cards**: export/share streaks and level ups directly to LinkedIn, X, etc.
-2. **Gamified profiles**: custom avatars for users
-3. **AI suggested roadmaps**: AI generated learning paths/suggestions for the skill a user is currently working on
-4. **Google OAuth**: sign in with Google alongside email/password
-5. **Color themes**: selectable themes beyond the default retro arcade palette
-6. **Full cross device data sync**: sync complete skill/session history (not just total hours) across devices, as a natural extension of the current local first architecture
+1. **Gamified profiles**: custom avatars for users
+2. **AI suggested roadmaps**: AI generated learning paths/suggestions for the skill a user is currently working on
+3. **Google OAuth**: sign in with Google alongside email/password
+4. **Full cross device data sync**: sync complete skill/session history (not just total hours) across devices, as a natural extension of the current local first architecture
 
 ##
 

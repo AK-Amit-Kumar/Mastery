@@ -4,16 +4,16 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: '#0a0a1a',
-        panel: '#12122a',
-        panel2: '#1a1a3a',
-        line: '#2e2e5c',
-        cyan: '#4deeea',
-        magenta: '#f92aad',
-        lime: '#7dff6b',
-        amber: '#ffd23f',
-        blood: '#ff4d4d',
-        paper: '#e8e6f0',
+        ink: 'var(--color-ink)',
+        panel: 'var(--color-panel)',
+        panel2: 'var(--color-panel2)',
+        line: 'var(--color-line)',
+        cyan: 'var(--color-cyan)',
+        magenta: 'var(--color-magenta)',
+        lime: 'var(--color-lime)',
+        amber: 'var(--color-amber)',
+        blood: 'var(--color-blood)',
+        paper: 'var(--color-paper)',
       },
       fontFamily: {
         pixel: ['"Press Start 2P"', 'cursive'],
@@ -22,8 +22,8 @@ export default {
       boxShadow: {
         pixel: '4px 4px 0 0 #000',
         'pixel-sm': '2px 2px 0 0 #000',
-        'pixel-cyan': '4px 4px 0 0 #4deeea',
-        'pixel-magenta': '4px 4px 0 0 #f92aad',
+        'pixel-cyan': '4px 4px 0 0 var(--color-cyan)',
+        'pixel-magenta': '4px 4px 0 0 var(--color-magenta)',
       },
       keyframes: {
         'float-up': {

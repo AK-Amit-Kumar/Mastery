@@ -46,7 +46,7 @@ export default function Login() {
       </div>
 
       {!isSupabaseConfigured && (
-        <PixelPanel className="mb-4" style={{ borderColor: '#ffd23f' }}>
+        <PixelPanel className="mb-4" style={{ borderColor: 'var(--color-amber)' }}>
           <p className="font-body text-lg text-amber">
             Supabase isn't configured yet. Copy <span className="text-paper">.env.example</span> to{' '}
             <span className="text-paper">.env.local</span>, fill in your project URL + anon key, and restart the

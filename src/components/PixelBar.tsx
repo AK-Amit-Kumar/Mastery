@@ -6,7 +6,7 @@ interface PixelBarProps {
   height?: 'sm' | 'md' | 'lg'
 }
 
-export default function PixelBar({ percent, color = '#4deeea', segments = 20, label, height = 'md' }: PixelBarProps) {
+export default function PixelBar({ percent, color = 'var(--color-cyan)', segments = 20, label, height = 'md' }: PixelBarProps) {
   const filled = Math.round((Math.max(0, Math.min(100, percent)) / 100) * segments)
   const heightClass = height === 'sm' ? 'h-3' : height === 'lg' ? 'h-6' : 'h-4'
 

@@ -8,7 +8,7 @@ interface PixelBarChartProps {
 // variable label content (e.g. a date wrapping to two lines) can never push a
 // bar out of alignment with its neighbors — every bar sits in an identical
 // fixed-height track regardless of what's above or below it.
-export default function PixelBarChart({ data, color = '#4deeea', height = 130 }: PixelBarChartProps) {
+export default function PixelBarChart({ data, color = 'var(--color-cyan)', height = 130 }: PixelBarChartProps) {
   const max = Math.max(1, ...data.map((d) => d.value))
 
   return (

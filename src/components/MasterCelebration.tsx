@@ -4,7 +4,14 @@ import { useStore } from '../store/useStore'
 import PixelButton from './PixelButton'
 import { playMaster } from '../utils/sound'
 
-const CONFETTI_COLORS = ['#4deeea', '#f92aad', '#7dff6b', '#ffd23f', '#ff4d4d', '#ffffff']
+const CONFETTI_COLORS = [
+  'var(--color-cyan)',
+  'var(--color-magenta)',
+  'var(--color-lime)',
+  'var(--color-amber)',
+  'var(--color-blood)',
+  '#ffffff',
+]
 
 interface ConfettiPiece {
   id: number
@@ -68,7 +75,13 @@ export default function MasterCelebration() {
         >
           <motion.p
             className="font-pixel text-4xl md:text-6xl text-amber"
-            animate={{ textShadow: ['0 0 10px #ffd23f', '0 0 30px #ff4d4d', '0 0 10px #ffd23f'] }}
+            animate={{
+              textShadow: [
+                '0 0 10px var(--color-amber)',
+                '0 0 30px var(--color-blood)',
+                '0 0 10px var(--color-amber)',
+              ],
+            }}
             transition={{ duration: 1.2, repeat: Infinity }}
           >
             MASTER

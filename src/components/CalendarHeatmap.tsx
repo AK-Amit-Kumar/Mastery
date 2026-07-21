@@ -7,7 +7,7 @@ interface CalendarHeatmapProps {
 }
 
 function intensityColor(hours: number): string {
-  if (hours <= 0) return '#1a1a3a'
+  if (hours <= 0) return 'var(--color-panel2)'
   if (hours < 1) return '#164e4a'
   if (hours < 2) return '#1f8a7a'
   if (hours < 4) return '#2fd3a8'

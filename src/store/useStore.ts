@@ -6,6 +6,7 @@ import { todayISO, isWeekend, addDays } from '../utils/date'
 import { computeStreak, recomputeStreakFromSessions } from '../utils/streak'
 import { getTierForHours } from '../utils/leveling'
 import type { ClickSoundId } from '../utils/sound'
+import type { ThemeId } from '../utils/themes'
 
 const DEFAULT_TARGET_HOURS = 10000
 
@@ -26,6 +27,7 @@ interface MasteryState {
   notificationsEnabled: boolean
   reminderTime: string // HH:mm, 24h
   lastReminderShownDate: string | null
+  theme: ThemeId
 
   addSkill: (name: string, icon: string, targetHours?: number) => string
   deleteSkill: (id: string) => void
@@ -37,6 +39,7 @@ interface MasteryState {
   setNotificationsEnabled: (enabled: boolean) => void
   setReminderTime: (time: string) => void
   markReminderShown: (date: string) => void
+  setTheme: (theme: ThemeId) => void
   importData: (skills: Skill[], unlockedAchievements: UnlockedAchievement[]) => void
   resetAllData: () => void
   clearLevelUpEvent: () => void
@@ -110,6 +113,7 @@ export const useStore = create<MasteryState>()(
       notificationsEnabled: false,
       reminderTime: '20:00',
       lastReminderShownDate: null,
+      theme: 'arcade',
 
       addSkill: (name, icon, targetHours = DEFAULT_TARGET_HOURS) => {
         const skill = newSkill(name.trim(), icon, targetHours)
@@ -237,6 +241,8 @@ export const useStore = create<MasteryState>()(
       setReminderTime: (time) => set({ reminderTime: time }),
 
       markReminderShown: (date) => set({ lastReminderShownDate: date }),
+
+      setTheme: (theme) => set({ theme }),
 
       importData: (skills, unlockedAchievements) =>
         set({

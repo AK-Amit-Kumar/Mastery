@@ -69,7 +69,7 @@ export default function Stats() {
         {skills.length === 0 ? (
           <p className="font-body text-lg text-paper/50">Add a skill and log some hours to see your chart.</p>
         ) : (
-          <PixelBarChart data={weeklyData} color="#4deeea" />
+          <PixelBarChart data={weeklyData} color="var(--color-cyan)" />
         )}
       </PixelPanel>
 

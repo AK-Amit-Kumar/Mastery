@@ -2,6 +2,59 @@
 @tailwind components;
 @tailwind utilities;
 
+:root,
+:root[data-theme='arcade'] {
+  --color-ink: #0a0a1a;
+  --color-panel: #12122a;
+  --color-panel2: #1a1a3a;
+  --color-line: #2e2e5c;
+  --color-cyan: #4deeea;
+  --color-magenta: #f92aad;
+  --color-lime: #7dff6b;
+  --color-amber: #ffd23f;
+  --color-blood: #ff4d4d;
+  --color-paper: #e8e6f0;
+}
+
+:root[data-theme='matrix'] {
+  --color-ink: #050f0a;
+  --color-panel: #0a1f14;
+  --color-panel2: #0f2e1c;
+  --color-line: #1f5c3a;
+  --color-cyan: #39ff14;
+  --color-magenta: #00e5a0;
+  --color-lime: #7dff6b;
+  --color-amber: #d4ff3f;
+  --color-blood: #ff4d4d;
+  --color-paper: #d6ffe0;
+}
+
+:root[data-theme='vaporwave'] {
+  --color-ink: #1a0a1f;
+  --color-panel: #24102c;
+  --color-panel2: #331640;
+  --color-line: #5c2e6e;
+  --color-cyan: #4ce0ff;
+  --color-magenta: #ff6ec7;
+  --color-lime: #ffe066;
+  --color-amber: #ff8a3f;
+  --color-blood: #ff4d4d;
+  --color-paper: #ffeaf5;
+}
+
+:root[data-theme='ice'] {
+  --color-ink: #05121a;
+  --color-panel: #0b2030;
+  --color-panel2: #123044;
+  --color-line: #2e5c78;
+  --color-cyan: #7de8ff;
+  --color-magenta: #7a8cff;
+  --color-lime: #6bffe0;
+  --color-amber: #ffe08a;
+  --color-blood: #ff4d4d;
+  --color-paper: #e8f6ff;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -10,8 +63,8 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: #0a0a1a;
-  color: #e8e6f0;
+  background: var(--color-ink);
+  color: var(--color-paper);
   image-rendering: pixelated;
 }
 
@@ -19,8 +72,8 @@ body {
   font-family: 'VT323', monospace;
   font-size: 20px;
   background-image:
-    radial-gradient(circle at 20% 10%, rgba(77, 238, 234, 0.06), transparent 40%),
-    radial-gradient(circle at 80% 90%, rgba(249, 42, 173, 0.06), transparent 40%);
+    radial-gradient(circle at 20% 10%, color-mix(in srgb, var(--color-cyan) 6%, transparent), transparent 40%),
+    radial-gradient(circle at 80% 90%, color-mix(in srgb, var(--color-magenta) 6%, transparent), transparent 40%);
 }
 
 h1,
@@ -32,8 +85,8 @@ h4,
 }
 
 ::selection {
-  background: #f92aad;
-  color: #0a0a1a;
+  background: var(--color-magenta);
+  color: var(--color-ink);
 }
 
 /* scrollbar - chunky retro */
@@ -42,11 +95,11 @@ h4,
   height: 12px;
 }
 ::-webkit-scrollbar-track {
-  background: #12122a;
+  background: var(--color-panel);
 }
 ::-webkit-scrollbar-thumb {
-  background: #4deeea;
-  border: 2px solid #0a0a1a;
+  background: var(--color-cyan);
+  border: 2px solid var(--color-ink);
 }
 
 /* CRT scanline overlay */

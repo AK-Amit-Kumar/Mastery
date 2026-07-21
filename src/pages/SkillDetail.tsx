@@ -3,8 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import type { Session } from '../types'
 import { getTierProgress, getOverallProgress, estimateYearsToMastery } from '../utils/leveling'
-import { todayISO, formatDateDisplay, daysBetween } from '../utils/date'
+import { todayISO, formatDateDisplay, daysBetween, getWeekStart } from '../utils/date'
 import { seedColor } from '../utils/color'
+import { downloadNodeAsPng } from '../utils/share'
 import TierBadge from '../components/TierBadge'
 import PixelBar from '../components/PixelBar'
 import PixelPanel from '../components/PixelPanel'
@@ -12,8 +13,11 @@ import PixelButton from '../components/PixelButton'
 import PixelModal from '../components/PixelModal'
 import StreakFlame from '../components/StreakFlame'
 import CalendarHeatmap from '../components/CalendarHeatmap'
+import ShareCard from '../components/ShareCard'
 import XPPopup, { type XPPopupItem } from '../components/XPPopup'
 import { playCoin } from '../utils/sound'
+
+const SHARE_CARD_SCALE = 0.55
 
 const QUICK_ADDS = [0.5, 1, 2]
 
@@ -37,9 +41,18 @@ export default function SkillDetail() {
   const [editDate, setEditDate] = useState('')
   const [editNote, setEditNote] = useState('')
   const [deletingSessionId, setDeletingSessionId] = useState<string | null>(null)
+  const [shareOpen, setShareOpen] = useState(false)
+  const [generatingShare, setGeneratingShare] = useState(false)
   const formRef = useRef<HTMLDivElement>(null)
+  const shareCardRef = useRef<HTMLDivElement>(null)
 
   const progress = useMemo(() => (skill ? getTierProgress(skill.totalHoursLogged) : null), [skill])
+
+  const hoursThisWeek = useMemo(() => {
+    if (!skill) return 0
+    const weekStart = getWeekStart(todayISO())
+    return skill.sessions.filter((s) => s.date >= weekStart).reduce((sum, s) => sum + s.hoursSpent, 0)
+  }, [skill])
 
   const avgHoursPerWeek = useMemo(() => {
     if (!skill || skill.sessions.length === 0) return 0
@@ -119,16 +132,32 @@ export default function SkillDetail() {
     setDeletingSessionId(null)
   }
 
+  const handleDownloadShareCard = async () => {
+    if (!shareCardRef.current) return
+    setGeneratingShare(true)
+    try {
+      const filename = `mastery-${skill.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.png`
+      await downloadNodeAsPng(shareCardRef.current, filename)
+    } finally {
+      setGeneratingShare(false)
+    }
+  }
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col gap-8">
       <XPPopup popups={popups} />
 
-      <button
-        onClick={() => navigate('/')}
-        className="font-pixel text-[10px] text-paper/50 hover:text-cyan self-start"
-      >
-        ← BACK
-      </button>
+      <div className="flex items-center justify-between gap-3">
+        <button
+          onClick={() => navigate('/')}
+          className="font-pixel text-[10px] text-paper/50 hover:text-cyan"
+        >
+          ← BACK
+        </button>
+        <PixelButton variant="cyan" size="sm" onClick={() => setShareOpen(true)}>
+          SHARE PROGRESS
+        </PixelButton>
+      </div>
 
       {/* Header */}
       <PixelPanel glow="cyan" className="flex flex-col md:flex-row items-center gap-6">
@@ -169,7 +198,7 @@ export default function SkillDetail() {
         <div>
           <PixelBar
             percent={overallPercent}
-            color="#ffd23f"
+            color="var(--color-amber)"
             segments={24}
             label={`Overall progress to ${skill.targetHours.toLocaleString()}h mastery`}
           />
@@ -375,6 +404,31 @@ export default function SkillDetail() {
           </PixelButton>
           <PixelButton variant="danger" onClick={handleDeleteSession}>
             DELETE
+          </PixelButton>
+        </div>
+      </PixelModal>
+
+      <PixelModal open={shareOpen} onClose={() => setShareOpen(false)} title="SHARE PROGRESS">
+        <div className="flex flex-col items-center gap-4">
+          <div
+            style={{
+              width: 720 * SHARE_CARD_SCALE,
+              height: 900 * SHARE_CARD_SCALE,
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{ transform: `scale(${SHARE_CARD_SCALE})`, transformOrigin: 'top left' }}>
+              <ShareCard
+                ref={shareCardRef}
+                skill={skill}
+                tier={progress.tier}
+                overallPercent={overallPercent}
+                hoursThisWeek={hoursThisWeek}
+              />
+            </div>
+          </div>
+          <PixelButton variant="cyan" onClick={handleDownloadShareCard} disabled={generatingShare}>
+            {generatingShare ? 'GENERATING...' : 'DOWNLOAD PNG'}
           </PixelButton>
         </div>
       </PixelModal>

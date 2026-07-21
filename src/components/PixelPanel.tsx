@@ -9,8 +9,8 @@ interface PixelPanelProps extends HTMLAttributes<HTMLDivElement> {
 const glowClasses: Record<string, string> = {
   cyan: 'shadow-pixel-cyan',
   magenta: 'shadow-pixel-magenta',
-  lime: 'shadow-[4px_4px_0_0_#7dff6b]',
-  amber: 'shadow-[4px_4px_0_0_#ffd23f]',
+  lime: 'shadow-[4px_4px_0_0_var(--color-lime)]',
+  amber: 'shadow-[4px_4px_0_0_var(--color-amber)]',
   none: 'shadow-pixel',
 }
 

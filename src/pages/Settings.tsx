@@ -7,6 +7,7 @@ import { CLICK_SOUND_OPTIONS, playClickSound, type ClickSoundId } from '../utils
 import { exportMasteryData, parseMasteryExport, type MasteryExport } from '../utils/export'
 import { getNotificationPermission, isNotificationSupported, requestNotificationPermission } from '../utils/notifications'
 import { to12Hour, to24HourTime, type MeridiemPeriod } from '../utils/date'
+import { THEME_OPTIONS } from '../utils/themes'
 
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 1)
 const MINUTES = Array.from({ length: 60 }, (_, i) => i)
@@ -21,6 +22,8 @@ export default function Settings() {
   const toggleMute = useStore((s) => s.toggleMute)
   const clickSound = useStore((s) => s.clickSound)
   const setClickSound = useStore((s) => s.setClickSound)
+  const theme = useStore((s) => s.theme)
+  const setTheme = useStore((s) => s.setTheme)
   const resetAllData = useStore((s) => s.resetAllData)
   const importData = useStore((s) => s.importData)
   const notificationsEnabled = useStore((s) => s.notificationsEnabled)
@@ -184,6 +187,42 @@ export default function Settings() {
         </div>
       </PixelPanel>
 
+      <PixelPanel glow="amber">
+        <h2 className="font-pixel text-sm text-amber mb-4">APPEARANCE</h2>
+        <label className="font-pixel text-[10px] text-paper/70 block mb-2">COLOR THEME</label>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {THEME_OPTIONS.map((option) => (
+            <button
+              key={option.id}
+              onClick={() => setTheme(option.id)}
+              className={`flex flex-col items-center gap-2 px-2 py-3 border-2 transition-colors ${
+                theme === option.id
+                  ? 'border-amber bg-panel2'
+                  : 'border-line bg-panel2 hover:border-amber/60'
+              }`}
+            >
+              <div className="flex gap-1">
+                {option.swatches.map((swatch, i) => (
+                  <span
+                    key={i}
+                    className="block w-3 h-3 border border-black/40"
+                    style={{ backgroundColor: swatch }}
+                  />
+                ))}
+              </div>
+              <span
+                className={`font-pixel text-[9px] ${theme === option.id ? 'text-amber' : 'text-paper/60'}`}
+              >
+                {option.label}
+              </span>
+            </button>
+          ))}
+        </div>
+        <p className="font-body text-base text-paper/40 mt-3">
+          Changes the app's accent colors. Tier ranks and achievement icons stay the same.
+        </p>
+      </PixelPanel>
+
       <PixelPanel glow="magenta">
         <h2 className="font-pixel text-sm text-magenta mb-4">REMINDERS</h2>
         {!isNotificationSupported() ? (
@@ -299,7 +338,7 @@ export default function Settings() {
         {importError && <p className="font-body text-lg text-blood mt-2">{importError}</p>}
       </PixelPanel>
 
-      <PixelPanel style={{ borderColor: '#ff4d4d' }}>
+      <PixelPanel style={{ borderColor: 'var(--color-blood)' }}>
         <h2 className="font-pixel text-sm text-blood mb-4">DANGER ZONE</h2>
         <p className="font-body text-xl text-paper/70 mb-4">
           Permanently erase every skill, session, streak, and achievement stored in this browser. This cannot be undone.
