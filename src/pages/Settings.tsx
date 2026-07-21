@@ -3,6 +3,12 @@ import { useStore } from '../store/useStore'
 import { useAuthStore } from '../store/useAuthStore'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { CLICK_SOUND_OPTIONS, playClickSound, type ClickSoundId } from '../utils/sound'
+import { exportMasteryData } from '../utils/export'
+import { getNotificationPermission, isNotificationSupported, requestNotificationPermission } from '../utils/notifications'
+import { to12Hour, to24HourTime, type MeridiemPeriod } from '../utils/date'
+
+const HOURS = Array.from({ length: 12 }, (_, i) => i + 1)
+const MINUTES = Array.from({ length: 60 }, (_, i) => i)
 import PixelPanel from '../components/PixelPanel'
 import PixelButton from '../components/PixelButton'
 import PixelModal from '../components/PixelModal'
@@ -15,6 +21,10 @@ export default function Settings() {
   const clickSound = useStore((s) => s.clickSound)
   const setClickSound = useStore((s) => s.setClickSound)
   const resetAllData = useStore((s) => s.resetAllData)
+  const notificationsEnabled = useStore((s) => s.notificationsEnabled)
+  const setNotificationsEnabled = useStore((s) => s.setNotificationsEnabled)
+  const reminderTime = useStore((s) => s.reminderTime)
+  const setReminderTime = useStore((s) => s.setReminderTime)
 
   const profile = useAuthStore((s) => s.profile)
   const authError = useAuthStore((s) => s.authError)
@@ -25,11 +35,43 @@ export default function Settings() {
   const [confirmText, setConfirmText] = useState('')
   const [usernameInput, setUsernameInput] = useState(profile?.username ?? '')
   const [usernameSaved, setUsernameSaved] = useState(false)
+  const [notifPermission, setNotifPermission] = useState(getNotificationPermission())
+  const [exported, setExported] = useState(false)
 
   const handleReset = () => {
     resetAllData()
     setConfirmOpen(false)
     setConfirmText('')
+  }
+
+  const handleToggleNotifications = async () => {
+    if (notificationsEnabled) {
+      setNotificationsEnabled(false)
+      return
+    }
+    const perm = await requestNotificationPermission()
+    setNotifPermission(perm)
+    if (perm === 'granted') setNotificationsEnabled(true)
+  }
+
+  const handleExport = () => {
+    exportMasteryData(skills, unlockedAchievements)
+    setExported(true)
+    setTimeout(() => setExported(false), 2000)
+  }
+
+  const { hour: reminderHour, minute: reminderMinute, period: reminderPeriod } = to12Hour(reminderTime)
+
+  const handleReminderHourChange = (hour: number) => {
+    setReminderTime(to24HourTime(hour, reminderMinute, reminderPeriod))
+  }
+
+  const handleReminderMinuteChange = (minute: number) => {
+    setReminderTime(to24HourTime(reminderHour, minute, reminderPeriod))
+  }
+
+  const handleReminderPeriodChange = (period: MeridiemPeriod) => {
+    setReminderTime(to24HourTime(reminderHour, reminderMinute, period))
   }
 
   const handleSaveUsername = async () => {
@@ -109,6 +151,85 @@ export default function Settings() {
         </div>
       </PixelPanel>
 
+      <PixelPanel glow="magenta">
+        <h2 className="font-pixel text-sm text-magenta mb-4">REMINDERS</h2>
+        {!isNotificationSupported() ? (
+          <p className="font-body text-lg text-paper/50">
+            Your browser doesn't support notifications.
+          </p>
+        ) : (
+          <>
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <p className="font-body text-xl text-paper/80">Daily practice reminder</p>
+              <PixelButton
+                variant={notificationsEnabled ? 'magenta' : 'default'}
+                size="sm"
+                onClick={handleToggleNotifications}
+              >
+                {notificationsEnabled ? 'ON 🔔' : 'OFF 🔕'}
+              </PixelButton>
+            </div>
+            {notifPermission === 'denied' && (
+              <p className="font-body text-lg text-blood mt-2">
+                Notifications are blocked for this site in your browser. Enable them in your browser's site
+                settings to turn reminders on.
+              </p>
+            )}
+            <div className="mt-5">
+              <label className="font-pixel text-[10px] text-paper/70 block mb-2">REMIND ME AT</label>
+              <div className="flex items-center gap-2">
+                <select
+                  value={reminderHour}
+                  onChange={(e) => handleReminderHourChange(Number(e.target.value))}
+                  disabled={!notificationsEnabled}
+                  className="bg-ink border-2 border-line px-2 py-2 font-body text-xl text-paper focus:outline-none focus:border-magenta disabled:opacity-40"
+                >
+                  {HOURS.map((h) => (
+                    <option key={h} value={h}>
+                      {h}
+                    </option>
+                  ))}
+                </select>
+                <span className="font-pixel text-lg text-paper/60">:</span>
+                <select
+                  value={reminderMinute}
+                  onChange={(e) => handleReminderMinuteChange(Number(e.target.value))}
+                  disabled={!notificationsEnabled}
+                  className="bg-ink border-2 border-line px-2 py-2 font-body text-xl text-paper focus:outline-none focus:border-magenta disabled:opacity-40"
+                >
+                  {MINUTES.map((m) => (
+                    <option key={m} value={m}>
+                      {String(m).padStart(2, '0')}
+                    </option>
+                  ))}
+                </select>
+                <div className="flex gap-1 ml-2">
+                  {(['AM', 'PM'] as MeridiemPeriod[]).map((period) => (
+                    <button
+                      key={period}
+                      type="button"
+                      onClick={() => handleReminderPeriodChange(period)}
+                      disabled={!notificationsEnabled}
+                      className={`font-pixel text-xs px-3 py-2 border-2 transition-colors disabled:opacity-40 ${
+                        reminderPeriod === period
+                          ? 'bg-magenta text-ink border-ink'
+                          : 'bg-panel2 text-paper/60 border-line hover:text-magenta hover:border-magenta'
+                      }`}
+                    >
+                      {period}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <p className="font-body text-base text-paper/40 mt-2">
+                If any skill hasn't been logged yet that day, you'll get a browser notification at this time.
+                Only fires while MASTERY is open in a tab.
+              </p>
+            </div>
+          </>
+        )}
+      </PixelPanel>
+
       <PixelPanel>
         <h2 className="font-pixel text-sm text-paper mb-4">DATA SUMMARY</h2>
         <div className="grid grid-cols-2 gap-4 font-body text-xl text-paper/80">
@@ -117,6 +238,18 @@ export default function Settings() {
           <p>Total sessions logged: <span className="text-cyan">{skills.reduce((sum, s) => sum + s.sessions.length, 0)}</span></p>
           <p>Total hours: <span className="text-magenta">{skills.reduce((sum, s) => sum + s.totalHoursLogged, 0).toFixed(1)}</span></p>
         </div>
+      </PixelPanel>
+
+      <PixelPanel glow="lime">
+        <h2 className="font-pixel text-sm text-lime mb-4">BACKUP</h2>
+        <p className="font-body text-xl text-paper/70 mb-4">
+          Download all your skills, sessions, and achievements as a JSON file. Since your data lives only in this
+          browser, keep a backup somewhere safe in case you clear your browser data or switch devices.
+        </p>
+        <PixelButton variant="lime" onClick={handleExport} disabled={skills.length === 0}>
+          EXPORT DATA (JSON)
+        </PixelButton>
+        {exported && <p className="font-body text-lg text-lime mt-2">Downloaded!</p>}
       </PixelPanel>
 
       <PixelPanel style={{ borderColor: '#ff4d4d' }}>

@@ -23,6 +23,9 @@ interface MasteryState {
   clickSound: ClickSoundId
   levelUpEvent: LevelUpEvent | null
   masterCelebrationSkillId: string | null
+  notificationsEnabled: boolean
+  reminderTime: string // HH:mm, 24h
+  lastReminderShownDate: string | null
 
   addSkill: (name: string, icon: string, targetHours?: number) => string
   deleteSkill: (id: string) => void
@@ -31,6 +34,9 @@ interface MasteryState {
   deleteSession: (skillId: string, sessionId: string) => void
   toggleMute: () => void
   setClickSound: (id: ClickSoundId) => void
+  setNotificationsEnabled: (enabled: boolean) => void
+  setReminderTime: (time: string) => void
+  markReminderShown: (date: string) => void
   resetAllData: () => void
   clearLevelUpEvent: () => void
   clearMasterCelebration: () => void
@@ -100,6 +106,9 @@ export const useStore = create<MasteryState>()(
       clickSound: 'blip',
       levelUpEvent: null,
       masterCelebrationSkillId: null,
+      notificationsEnabled: false,
+      reminderTime: '20:00',
+      lastReminderShownDate: null,
 
       addSkill: (name, icon, targetHours = DEFAULT_TARGET_HOURS) => {
         const skill = newSkill(name.trim(), icon, targetHours)
@@ -221,6 +230,12 @@ export const useStore = create<MasteryState>()(
       toggleMute: () => set((state) => ({ muted: !state.muted })),
 
       setClickSound: (id) => set({ clickSound: id }),
+
+      setNotificationsEnabled: (enabled) => set({ notificationsEnabled: enabled }),
+
+      setReminderTime: (time) => set({ reminderTime: time }),
+
+      markReminderShown: (date) => set({ lastReminderShownDate: date }),
 
       resetAllData: () =>
         set({

@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useStore } from './store/useStore'
 import { useAuthStore } from './store/useAuthStore'
 import { isSupabaseConfigured } from './lib/supabase'
+import { todayISO } from './utils/date'
+import { getNotificationPermission, showReminderNotification } from './utils/notifications'
 import NavBar from './components/NavBar'
 import LevelUpModal from './components/LevelUpModal'
 import MasterCelebration from './components/MasterCelebration'
@@ -39,6 +41,32 @@ export default function App() {
     seedIfEmpty()
     initializeAuth()
   }, [seedIfEmpty, initializeAuth])
+
+  useEffect(() => {
+    const checkReminder = () => {
+      const state = useStore.getState()
+      if (!state.notificationsEnabled) return
+      if (getNotificationPermission() !== 'granted') return
+      if (state.skills.length === 0) return
+
+      const today = todayISO()
+      if (state.lastReminderShownDate === today) return
+
+      const now = new Date()
+      const nowTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+      if (nowTime < state.reminderTime) return
+
+      const unlogged = state.skills.filter((s) => s.lastLogDate !== today).map((s) => s.name)
+      if (unlogged.length === 0) return
+
+      showReminderNotification(unlogged)
+      state.markReminderShown(today)
+    }
+
+    checkReminder()
+    const interval = setInterval(checkReminder, 60_000)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <BrowserRouter>
