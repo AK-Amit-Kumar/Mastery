@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { useAuthStore } from '../store/useAuthStore'
+import { useOnlineStatus } from '../utils/useOnlineStatus'
 
 const links = [
   { to: '/', label: 'HOME' },
@@ -17,6 +18,7 @@ export default function NavBar() {
   const profile = useAuthStore((s) => s.profile)
   const signOut = useAuthStore((s) => s.signOut)
   const [menuOpen, setMenuOpen] = useState(false)
+  const isOnline = useOnlineStatus()
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     `font-pixel text-[10px] px-3 py-2 border-2 transition-colors ${
@@ -28,9 +30,19 @@ export default function NavBar() {
   return (
     <header className="border-b-4 border-line bg-panel sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-        <NavLink to="/" className="font-pixel text-sm text-cyan tracking-tight shrink-0">
-          MASTERY<span className="text-magenta">_</span>
-        </NavLink>
+        <div className="flex items-center gap-2 shrink-0">
+          <NavLink to="/" className="font-pixel text-sm text-cyan tracking-tight shrink-0">
+            MASTERY<span className="text-magenta">_</span>
+          </NavLink>
+          {!isOnline && (
+            <span
+              className="font-pixel text-[9px] px-2 py-1 border-2 bg-panel2 border-amber text-amber"
+              title="No network connection — your local skill data still works fine."
+            >
+              OFFLINE
+            </span>
+          )}
+        </div>
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-2 flex-wrap">

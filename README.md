@@ -49,6 +49,13 @@ Track as many skills as you want, log sessions as you go, and watch each one cli
 **Data control**
 * All skill/session data stored locally in the browser (instant, offline friendly)
 * "Reset All Data" flow with typed confirmation to prevent accidental wipes
+* Export/import all data as a single JSON file for backup or moving between devices
+* Optional daily practice reminder (browser notification) if a skill hasn't been logged yet that day
+
+**Installable & offline**
+* Installable as a PWA (Add to Home Screen / desktop install) with a full app icon set
+* App shell, assets, and fonts are cached via a service worker, so the app loads and works with no network connection
+* Small "OFFLINE" indicator in the nav bar when there's no connection (skill tracking keeps working regardless — only login/leaderboard sync need network)
 
 ##
 
@@ -62,6 +69,7 @@ Track as many skills as you want, log sessions as you go, and watch each one cli
 | Animation | Framer Motion |
 | Auth & shared data | Supabase (email/password auth + Postgres) |
 | Routing | react-router-dom |
+| Offline / installability | vite-plugin-pwa (Workbox) — service worker + web app manifest |
 | Hosting | Netlify (auto deploy on push to `main`) |
 
 ##

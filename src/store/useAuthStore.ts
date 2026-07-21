@@ -28,6 +28,18 @@ interface AuthState {
   clearMessages: () => void
 }
 
+const SESSION_TIMEOUT_MS = 4000
+
+// getSession() normally resolves from local storage without needing network, but if it does
+// hang (e.g. no connectivity mid-refresh), this keeps the app from being stuck on "LOADING..."
+// forever instead of reaching the user's local skill data.
+async function getSessionWithTimeout() {
+  const timeout = new Promise<{ data: { session: null } }>((resolve) =>
+    setTimeout(() => resolve({ data: { session: null } }), SESSION_TIMEOUT_MS)
+  )
+  return Promise.race([supabase.auth.getSession(), timeout])
+}
+
 async function ensureProfile(user: User): Promise<Profile | null> {
   const { data: existing } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle()
   if (existing) return existing as Profile
@@ -62,7 +74,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
     const {
       data: { session },
-    } = await supabase.auth.getSession()
+    } = await getSessionWithTimeout()
 
     if (session?.user) {
       const profile = await ensureProfile(session.user)
