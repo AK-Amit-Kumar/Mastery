@@ -37,6 +37,7 @@ interface MasteryState {
   setNotificationsEnabled: (enabled: boolean) => void
   setReminderTime: (time: string) => void
   markReminderShown: (date: string) => void
+  importData: (skills: Skill[], unlockedAchievements: UnlockedAchievement[]) => void
   resetAllData: () => void
   clearLevelUpEvent: () => void
   clearMasterCelebration: () => void
@@ -236,6 +237,14 @@ export const useStore = create<MasteryState>()(
       setReminderTime: (time) => set({ reminderTime: time }),
 
       markReminderShown: (date) => set({ lastReminderShownDate: date }),
+
+      importData: (skills, unlockedAchievements) =>
+        set({
+          skills,
+          unlockedAchievements,
+          levelUpEvent: null,
+          masterCelebrationSkillId: null,
+        }),
 
       resetAllData: () =>
         set({

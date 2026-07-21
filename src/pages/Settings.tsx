@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import type { ChangeEvent } from 'react'
 import { useStore } from '../store/useStore'
 import { useAuthStore } from '../store/useAuthStore'
 import { isSupabaseConfigured } from '../lib/supabase'
 import { CLICK_SOUND_OPTIONS, playClickSound, type ClickSoundId } from '../utils/sound'
-import { exportMasteryData } from '../utils/export'
+import { exportMasteryData, parseMasteryExport, type MasteryExport } from '../utils/export'
 import { getNotificationPermission, isNotificationSupported, requestNotificationPermission } from '../utils/notifications'
 import { to12Hour, to24HourTime, type MeridiemPeriod } from '../utils/date'
 
@@ -21,6 +22,7 @@ export default function Settings() {
   const clickSound = useStore((s) => s.clickSound)
   const setClickSound = useStore((s) => s.setClickSound)
   const resetAllData = useStore((s) => s.resetAllData)
+  const importData = useStore((s) => s.importData)
   const notificationsEnabled = useStore((s) => s.notificationsEnabled)
   const setNotificationsEnabled = useStore((s) => s.setNotificationsEnabled)
   const reminderTime = useStore((s) => s.reminderTime)
@@ -37,6 +39,10 @@ export default function Settings() {
   const [usernameSaved, setUsernameSaved] = useState(false)
   const [notifPermission, setNotifPermission] = useState(getNotificationPermission())
   const [exported, setExported] = useState(false)
+  const [pendingImport, setPendingImport] = useState<MasteryExport | null>(null)
+  const [importError, setImportError] = useState<string | null>(null)
+  const [imported, setImported] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleReset = () => {
     resetAllData()
@@ -58,6 +64,33 @@ export default function Settings() {
     exportMasteryData(skills, unlockedAchievements)
     setExported(true)
     setTimeout(() => setExported(false), 2000)
+  }
+
+  const handleImportClick = () => {
+    setImportError(null)
+    fileInputRef.current?.click()
+  }
+
+  const handleFileSelected = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setImportError(null)
+    try {
+      const text = await file.text()
+      setPendingImport(parseMasteryExport(text))
+    } catch (err) {
+      setPendingImport(null)
+      setImportError(err instanceof Error ? err.message : 'Could not read that file.')
+    }
+  }
+
+  const handleConfirmImport = () => {
+    if (!pendingImport) return
+    importData(pendingImport.skills, pendingImport.unlockedAchievements)
+    setPendingImport(null)
+    setImported(true)
+    setTimeout(() => setImported(false), 2000)
   }
 
   const { hour: reminderHour, minute: reminderMinute, period: reminderPeriod } = to12Hour(reminderTime)
@@ -246,10 +279,24 @@ export default function Settings() {
           Download all your skills, sessions, and achievements as a JSON file. Since your data lives only in this
           browser, keep a backup somewhere safe in case you clear your browser data or switch devices.
         </p>
-        <PixelButton variant="lime" onClick={handleExport} disabled={skills.length === 0}>
-          EXPORT DATA (JSON)
-        </PixelButton>
+        <div className="flex flex-wrap gap-3">
+          <PixelButton variant="lime" onClick={handleExport} disabled={skills.length === 0}>
+            EXPORT DATA (JSON)
+          </PixelButton>
+          <PixelButton variant="default" onClick={handleImportClick}>
+            IMPORT DATA (JSON)
+          </PixelButton>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/json,.json"
+          onChange={handleFileSelected}
+          className="hidden"
+        />
         {exported && <p className="font-body text-lg text-lime mt-2">Downloaded!</p>}
+        {imported && <p className="font-body text-lg text-lime mt-2">Data imported!</p>}
+        {importError && <p className="font-body text-lg text-blood mt-2">{importError}</p>}
       </PixelPanel>
 
       <PixelPanel style={{ borderColor: '#ff4d4d' }}>
@@ -279,6 +326,23 @@ export default function Settings() {
           </PixelButton>
           <PixelButton variant="danger" onClick={handleReset} disabled={confirmText !== 'RESET'}>
             ERASE EVERYTHING
+          </PixelButton>
+        </div>
+      </PixelModal>
+
+      <PixelModal open={pendingImport !== null} onClose={() => setPendingImport(null)} title="⚠ CONFIRM IMPORT">
+        <p className="font-body text-xl text-paper/80 mb-6">
+          This file has <span className="text-lime">{pendingImport?.skills.length ?? 0}</span> skill(s) and{' '}
+          <span className="text-lime">{pendingImport?.unlockedAchievements.length ?? 0}</span> achievement(s).
+          Importing will <span className="text-blood">replace all data currently stored in this browser</span>{' '}
+          ({skills.length} skill(s) now). This cannot be undone.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <PixelButton variant="default" onClick={() => setPendingImport(null)}>
+            CANCEL
+          </PixelButton>
+          <PixelButton variant="lime" onClick={handleConfirmImport}>
+            REPLACE WITH IMPORTED DATA
           </PixelButton>
         </div>
       </PixelModal>
